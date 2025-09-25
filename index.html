@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interativo de Histologia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn.correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl mx-auto">
+        <!-- Tela Inicial -->
+        <div id="start-screen" class="bg-gray-800 p-8 rounded-xl shadow-2xl text-center">
+            <h1 class="text-3xl font-bold mb-2 text-cyan-400">Quiz de Histologia</h1>
+            <p class="text-gray-300 mb-8">Teste seus conhecimentos sobre Tecido Epitelial e Conjuntivo.</p>
+            <div id="category-selection" class="space-y-4">
+                <h2 class="text-xl font-semibold">Escolha uma matéria para começar:</h2>
+                <!-- Botões de categoria serão inseridos aqui pelo JS -->
+                <button onclick="startQuiz('all')" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                    Todas as Matérias
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela do Quiz -->
+        <div id="quiz-screen" class="hidden bg-gray-800 p-8 rounded-xl shadow-2xl">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span id="question-counter" class="text-sm font-semibold text-cyan-400"></span>
+                    <span id="score-counter" class="text-sm font-semibold text-gray-300"></span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-cyan-500 h-2.5 rounded-full transition-all duration-500"></div>
+                </div>
+            </div>
+            
+            <p id="question-text" class="text-xl font-medium mb-6 min-h-[100px]"></p>
+            
+            <div id="options-container" class="space-y-3">
+                <!-- Opções serão inseridas aqui pelo JS -->
+            </div>
+            
+            <div id="feedback-container" class="mt-4 text-center font-semibold"></div>
+            <div id="explanation-container" class="hidden mt-4 p-4 bg-gray-700 rounded-lg text-left text-gray-300"></div>
+
+
+            <button id="next-button" class="hidden w-full mt-6 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                Próxima Pergunta
+            </button>
+        </div>
+
+        <!-- Tela Final -->
+        <div id="end-screen" class="hidden bg-gray-800 p-8 rounded-xl shadow-2xl text-center">
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">Quiz Finalizado!</h2>
+            <p class="text-xl mb-2">Sua pontuação final foi:</p>
+            <p id="final-score" class="text-5xl font-extrabold mb-8"></p>
+            <button onclick="restartQuiz()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">
+                Refazer o Quiz
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Dados do Quiz em formato JSON com explicações
+        const quizData = {
+          "titulo": "Quiz de Histologia Organizado por Matéria",
+          "partes": [
+            {
+              "titulo": "Parte 1: Tecido Epitelial de Revestimento",
+              "questoes": [
+                { "numero": 1, "pergunta": "Ao observar uma lâmina, você nota um tecido com células muito próximas umas das outras, organizadas em múltiplas camadas. A camada mais superficial é composta por células achatadas e sem núcleo, com aspecto de uma faixa rosa intensa. Qual tecido você está observando?", "opcoes": { "a": {"texto": "Epitélio de Transição", "explicacao": "Incorreto. O epitélio de transição possui células superficiais arredondadas (em forma de cúpula), não achatadas e anucleadas."}, "b": {"texto": "Epitélio Estratificado Pavimentoso Não Queratinizado", "explicacao": "Incorreto. O tipo não queratinizado teria células superficiais com núcleos visíveis. A descrição 'sem núcleo' é a chave para a resposta."}, "c": {"texto": "Epitélio Estratificado Pavimentoso Queratinizado", "explicacao": "Correto! A descrição corresponde perfeitamente à epiderme: múltiplas camadas (estratificado), células superficiais achatadas (pavimentoso) e uma camada de queratina anucleada."}, "d": {"texto": "Tecido Conjuntivo Denso Não Modelado", "explicacao": "Incorreto. O tecido conjuntivo tem células espaçadas por uma matriz, ao contrário da descrição de células muito próximas."} }, "respostaCorreta": "c" },
+                { "numero": 2, "pergunta": "A incapacidade de limpar muco e partículas das vias aéreas em fumantes crônicos está frequentemente associada a uma alteração tecidual chamada Metaplasia Escamosa. O que ocorre nesta condição?", "opcoes": { "a": {"texto": "O epitélio simples cúbico é substituído por epitélio colunar.", "explicacao": "Incorreto. Esta não é a transformação que ocorre nos brônquios de fumantes."}, "b": {"texto": "O epitélio pseudoestratificado ciliado é substituído por epitélio estratificado pavimentoso.", "explicacao": "Correto! O epitélio se torna mais resistente à agressão da fumaça, mas perde os cílios, que são essenciais para a limpeza das vias respiratórias."}, "c": {"texto": "O tecido conjuntivo frouxo se torna denso.", "explicacao": "Incorreto. A metaplasia é uma alteração do tecido epitelial, não do tecido conjuntivo."}, "d": {"texto": "As glândulas mucosas se tornam serosas.", "explicacao": "Incorreto. A metaplasia neste caso afeta o epitélio de revestimento, não o tipo de secreção glandular."} }, "respostaCorreta": "b" },
+                { "numero": 3, "pergunta": "Um paciente apresenta bolhas flácidas na pele e mucosas. O diagnóstico é Pênfigo Vulgar. Qual estrutura de junção celular é o alvo dos autoanticorpos nesta doença?", "opcoes": { "a": {"texto": "Junções de oclusão", "explicacao": "Incorreto. Estas junções vedam o espaço entre as células. Sua destruição causaria problemas de permeabilidade, mas não as bolhas características do pênfigo."}, "b": {"texto": "Junções comunicantes", "explicacao": "Incorreto. Estas junções permitem a comunicação entre células. Não estão relacionadas à adesão estrutural que é perdida no pênfigo."}, "c": {"texto": "Hemidesmossomos", "explicacao": "Incorreto. Os hemidesmossomos ancoram o epitélio à lâmina basal. Doenças que os afetam (como o Penfigoide Bolhoso) causam bolhas mais tensas pela separação de toda a epiderme."}, "d": {"texto": "Desmossomos", "explicacao": "Correto! O pênfigo vulgar é causado por anticorpos contra as desmogleínas dos desmossomos, o que desfaz a união entre os queratinócitos e forma bolhas."} }, "respostaCorreta": "d" },
+                { "numero": 4, "pergunta": "Em uma lâmina de intestino delgado, você observa projeções digitiformes no ápice das células colunares, que aumentam a área de superfície. Essas estruturas são:", "opcoes": { "a": {"texto": "Cílios", "explicacao": "Incorreto. Cílios são estruturas móveis, encontradas por exemplo nas vias respiratórias. As do intestino são imóveis e para absorção."}, "b": {"texto": "Estereocílios", "explicacao": "Incorreto. Estereocílios são microvilosidades muito longas, encontradas no epidídimo e ouvido interno, mas não no intestino."}, "c": {"texto": "Microvilosidades", "explicacao": "Correto! As microvilosidades formam a 'borda em escova' do intestino, aumentando drasticamente a superfície para a absorção de nutrientes."}, "d": {"texto": "Flagelos", "explicacao": "Incorreto. Flagelos são longos e usados para propulsão celular, como no espermatozoide."} }, "respostaCorreta": "c" },
+                { "numero": 5, "pergunta": "Qual tipo de epitélio é especializado em distensão e é encontrado exclusivamente no sistema urinário, como na bexiga?", "opcoes": { "a": {"texto": "Epitélio Pseudoestratificado", "explicacao": "Incorreto. Este epitélio é típico do sistema respiratório."}, "b": {"texto": "Epitélio Simples Pavimentoso", "explicacao": "Incorreto. Este epitélio é muito fino e serve para trocas, não para distensão."}, "c": {"texto": "Epitélio de Transição (Urotélio)", "explicacao": "Correto! O urotélio pode se esticar para acomodar o volume de urina, e suas células superficiais em cúpula protegem contra a toxicidade da urina."}, "d": {"texto": "Epitélio Estratificado Cúbico", "explicacao": "Incorreto. Este epitélio é raro e encontrado em ductos de glândulas, não sendo especializado em distensão."} }, "respostaCorreta": "c" },
+                { "numero": 18, "pergunta": "O epitélio que reveste o interior do estômago, composto por uma única camada de células altas secretoras de muco, é do tipo:", "opcoes": { "a": {"texto": "Simples Cúbico", "explicacao": "Incorreto. O epitélio do estômago é formado por células altas (colunares), não cúbicas."}, "b": {"texto": "Estratificado Pavimentoso", "explicacao": "Incorreto. Este epitélio é para proteção contra atrito, como no esôfago, não para a secreção ativa do estômago."}, "c": {"texto": "Simples Colunar", "explicacao": "Correto! É uma camada única de células altas, especializadas em secretar o muco que protege a parede do estômago do ácido gástrico."}, "d": {"texto": "Pseudoestratificado", "explicacao": "Incorreto. Este epitélio é característico das vias respiratórias."} }, "respostaCorreta": "c" },
+                { "numero": 20, "pergunta": "A principal vantagem de um epitélio ser estratificado é:", "opcoes": { "a": {"texto": "Melhorar a absorção", "explicacao": "Incorreto. Múltiplas camadas dificultam a absorção, que é mais eficiente em epitélios simples."}, "b": {"texto": "Aumentar a capacidade de secreção", "explicacao": "Incorreto. A secreção é mais característica de epitélios simples. A estratificação não otimiza esta função."}, "c": {"texto": "Facilitar a difusão de gases", "explicacao": "Incorreto. A difusão de gases requer a barreira mais fina possível, como a do epitélio simples pavimentoso dos alvéolos."}, "d": {"texto": "Oferecer maior proteção contra atrito e invasão", "explicacao": "Correto! As múltiplas camadas permitem que células superficiais sejam perdidas sem comprometer os tecidos mais profundos, fornecendo uma barreira robusta."} }, "respostaCorreta": "d" }
+              ]
+            },
+            {
+              "titulo": "Parte 2: Tecido Epitelial Glandular",
+              "questoes": [
+                { "numero": 6, "pergunta": "Uma glândula sebácea libera sua secreção oleosa através da morte e desintegração completa da célula secretora. Como é classificado este tipo de secreção?", "opcoes": { "a": {"texto": "Merócrina", "explicacao": "Incorreto. A secreção merócrina ocorre por exocitose, sem perda de citoplasma, como nas glândulas salivares."}, "b": {"texto": "Apócrina", "explicacao": "Incorreto. Na secreção apócrina, perde-se uma parte do citoplasma apical, como na glândula mamária."}, "c": {"texto": "Holócrina", "explicacao": "Correto! 'Holos' significa 'inteiro'. A célula inteira se desintegra para se tornar o produto de secreção, que é o sebo."}, "d": {"texto": "Endócrina", "explicacao": "Incorreto. Endócrina se refere a glândulas que secretam na corrente sanguínea. A glândula sebácea é exócrina."} }, "respostaCorreta": "c" },
+                { "numero": 11, "pergunta": "Ao observar uma glândula salivar em H&E, você identifica estruturas com células de citoplasma claro/pálido e núcleo achatado na base. Que tipo de estrutura você está vendo?", "opcoes": { "a": {"texto": "Um ducto excretor", "explicacao": "Incorreto. Ductos excretores geralmente têm um epitélio cúbico ou colunar com células bem coradas e núcleos centrais."}, "b": {"texto": "Um ácino seroso", "explicacao": "Incorreto. Ácinos serosos têm células com citoplasma roxo (basofílico) na base e núcleo arredondado, pois produzem proteínas."}, "c": {"texto": "Um túbulo mucoso", "explicacao": "Correto! A descrição é clássica de uma porção secretora mucosa. O muco não se cora bem com H&E, deixando o citoplasma pálido, e o núcleo é empurrado para a base."}, "d": {"texto": "Um capilar sanguíneo", "explicacao": "Incorreto. Capilares são muito menores e formados por células endoteliais achatadas."} }, "respostaCorreta": "c" },
+                { "numero": 12, "pergunta": "As células caliciformes, encontradas no epitélio intestinal e respiratório, são um exemplo de glândula:", "opcoes": { "a": {"texto": "Exócrina, multicelular, tubular", "explicacao": "Incorreto. A célula caliciforme é unicelular."}, "b": {"texto": "Endócrina, unicelular", "explicacao": "Incorreto. Ela secreta muco para uma superfície (lúmen intestinal ou respiratório), portanto é exócrina."}, "c": {"texto": "Exócrina, unicelular, mucosa", "explicacao": "Correto! É uma glândula exócrina composta por uma única célula que secreta muco."}, "d": {"texto": "Holócrina, multicelular", "explicacao": "Incorreto. Ela é unicelular e seu modo de secreção é merócrino."} }, "respostaCorreta": "c" },
+                { "numero": 15, "pergunta": "Um adenoma é um tumor:", "opcoes": { "a": {"texto": "Maligno de origem conjuntiva", "explicacao": "Incorreto. Um tumor maligno de origem conjuntiva é um sarcoma."}, "b": {"texto": "Benigno de origem glandular", "explicacao": "Correto! 'Adeno' refere-se a glândula, e o sufixo '-oma' geralmente indica um tumor benigno."}, "c": {"texto": "Maligno de origem epitelial de revestimento", "explicacao": "Incorreto. Um tumor maligno de epitélio de revestimento é um carcinoma. Se for de uma glândula, é um adenocarcinoma."}, "d": {"texto": "Benigno de origem muscular", "explicacao": "Incorreto. Um tumor benigno de origem muscular é um mioma (leiomioma ou rabdomioma)."} }, "respostaCorreta": "b" }
+              ]
+            },
+            {
+              "titulo": "Parte 3: Tecido Conjuntivo Propriamente Dito (TCPD)",
+              "questoes": [
+                { "numero": 3, "pergunta": "Qual é a principal célula responsável pela produção da matriz extracelular no Tecido Conjuntivo Propriamente Dito?", "opcoes": { "a": {"texto": "Macrófago", "explicacao": "Incorreto. O macrófago é uma célula de defesa, especializada em fagocitose."}, "b": {"texto": "Mastócito", "explicacao": "Incorreto. O mastócito participa de reações alérgicas e inflamatórias, liberando histamina."}, "c": {"texto": "Plasmócito", "explicacao": "Incorreto. O plasmócito é uma célula de defesa que produz anticorpos."}, "d": {"texto": "Fibroblasto", "explicacao": "Correto! O fibroblasto é a célula que sintetiza todos os componentes da matriz extracelular: fibras colágenas, elásticas, reticulares e a substância fundamental."} }, "respostaCorreta": "d" },
+                { "numero": 7, "pergunta": "Ao analisar a lâmina de um tendão, você observa feixes espessos e organizados de fibras colágenas, todas orientadas na mesma direção. Como é classificado este tecido?", "opcoes": { "a": {"texto": "Tecido Conjuntivo Frouxo", "explicacao": "Incorreto. O tecido frouxo tem poucas fibras e muitas células, com aspecto mais 'vazio'."}, "b": {"texto": "Tecido Conjuntivo Denso Não Modelado", "explicacao": "Incorreto. No tecido não modelado, as fibras de colágeno são grossas, mas estão desorganizadas, em várias direções."}, "c": {"texto": "Tecido Conjuntivo Denso Modelado", "explicacao": "Correto! A organização paralela das fibras de colágeno é a característica principal deste tecido, conferindo máxima resistência à tensão em uma direção, como nos tendões."}, "d": {"texto": "Tecido Epitelial Colunar Simples", "explicacao": "Incorreto. Trata-se de um tecido conjuntivo, com muita matriz e células espaçadas, não um epitélio."} }, "respostaCorreta": "c" },
+                { "numero": 12, "pergunta": "A Síndrome de Ehlers-Danlos é caracterizada por hipermobilidade articular e pele super elástica. Esta condição é resultado de um defeito na produção de:", "opcoes": { "a": {"texto": "Queratina", "explicacao": "Incorreto. A queratina é a proteína estrutural do epitélio da pele, e defeitos nela causam doenças de pele bolhosas, mas não hipermobilidade articular."}, "b": {"texto": "Colágeno", "explicacao": "Correto! Esta síndrome é um grupo de doenças genéticas que afetam a síntese ou estrutura do colágeno, a principal proteína do tecido conjuntivo, resultando em fragilidade tecidual."}, "c": {"texto": "Melanina", "explicacao": "Incorreto. A melanina é o pigmento que dá cor à pele. Defeitos em sua produção causam albinismo."}, "d": {"texto": "Miosina", "explicacao": "Incorreto. A miosina é uma proteína contrátil do tecido muscular."} }, "respostaCorreta": "b" },
+                { "numero": 14, "pergunta": "Uma cicatriz que cresce de forma excessiva, para além dos limites da ferida original, devido à produção exagerada de colágeno, é chamada de:", "opcoes": { "a": {"texto": "Fibrose", "explicacao": "Incorreto. Fibrose é a substituição de tecido funcional por tecido conjuntivo, mas dentro de um órgão. O queloide é um tipo específico de cicatriz na pele."}, "b": {"texto": "Adenoma", "explicacao": "Incorreto. Um adenoma é um tumor benigno de uma glândula."}, "c": {"texto": "Carcinoma", "explicacao": "Incorreto. Um carcinoma é um tumor maligno de origem epitelial."}, "d": {"texto": "Queloide", "explicacao": "Correto! O queloide é caracterizado pela proliferação excessiva de fibroblastos e deposição de colágeno durante a cicatrização, formando uma cicatriz elevada e extensa."} }, "respostaCorreta": "d" }
+              ]
+            }
+          ]
+        };
+
+        // Referências aos Elementos do DOM
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const endScreen = document.getElementById('end-screen');
+        const categorySelection = document.getElementById('category-selection');
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const nextButton = document.getElementById('next-button');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const explanationContainer = document.getElementById('explanation-container');
+        
+        const questionCounter = document.getElementById('question-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const finalScore = document.getElementById('final-score');
+        
+        // Variáveis de estado do Quiz
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // Inicialização
+        function init() {
+            // Gera os botões de categoria dinamicamente
+            quizData.partes.forEach(parte => {
+                const button = document.createElement('button');
+                button.textContent = parte.titulo.replace(/Parte \d+: /, ''); // Nome mais curto
+                button.className = 'w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105';
+                button.onclick = () => startQuiz(parte.titulo);
+                categorySelection.insertBefore(button, categorySelection.lastElementChild);
+            });
+
+            nextButton.addEventListener('click', nextQuestion);
+        }
+
+        // Inicia o Quiz
+        function startQuiz(category) {
+            currentQuestionIndex = 0;
+            score = 0;
+
+            if (category === 'all') {
+                currentQuestions = quizData.partes.flatMap(parte => parte.questoes);
+            } else {
+                const selectedPart = quizData.partes.find(p => p.titulo === category);
+                currentQuestions = selectedPart ? selectedPart.questoes : [];
+            }
+            
+            // Embaralha as perguntas para uma experiência diferente a cada vez
+            currentQuestions.sort(() => Math.random() - 0.5);
+
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            endScreen.classList.add('hidden');
+            
+            showQuestion();
+        }
+
+        // Mostra a pergunta atual
+        function showQuestion() {
+            resetState();
+            const question = currentQuestions[currentQuestionIndex];
+            
+            questionText.textContent = question.pergunta;
+            questionCounter.textContent = `Pergunta ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+            scoreCounter.textContent = `Pontuação: ${score}`;
+            progressBar.style.width = `${((currentQuestionIndex) / currentQuestions.length) * 100}%`;
+
+            for (const key in question.opcoes) {
+                const option = question.opcoes[key];
+                const button = document.createElement('button');
+                button.innerHTML = `<span class="font-bold mr-2">${key.toUpperCase()})</span> ${option.texto}`;
+                button.dataset.key = key;
+                button.className = 'option-btn block w-full text-left p-4 rounded-lg bg-gray-700 hover:bg-gray-600 border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors';
+                button.addEventListener('click', selectAnswer);
+                optionsContainer.appendChild(button);
+            }
+        }
+
+        // Reseta o estado entre as perguntas
+        function resetState() {
+            nextButton.classList.add('hidden');
+            feedbackContainer.textContent = '';
+            explanationContainer.classList.add('hidden');
+            while (optionsContainer.firstChild) {
+                optionsContainer.removeChild(optionsContainer.firstChild);
+            }
+        }
+
+        // Processa a resposta selecionada
+        function selectAnswer(e) {
+            const selectedButton = e.currentTarget;
+            const selectedKey = selectedButton.dataset.key;
+            const question = currentQuestions[currentQuestionIndex];
+            const correctKey = question.respostaCorreta;
+            
+            // Desabilita todos os botões e mostra a explicação
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button.dataset.key === correctKey) {
+                    button.classList.add('correct');
+                }
+            });
+
+            const selectedOptionData = question.opcoes[selectedKey];
+            explanationContainer.textContent = selectedOptionData.explicacao;
+            explanationContainer.classList.remove('hidden');
+
+            if (selectedKey === correctKey) {
+                score++;
+                scoreCounter.textContent = `Pontuação: ${score}`;
+                feedbackContainer.textContent = 'Correto!';
+                feedbackContainer.className = 'mt-4 text-center font-semibold text-green-500';
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackContainer.textContent = 'Incorreto!';
+                feedbackContainer.className = 'mt-4 text-center font-semibold text-red-500';
+            }
+            
+            // Atualiza a barra de progresso após a resposta
+            progressBar.style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
+            nextButton.classList.remove('hidden');
+        }
+
+        // Avança para a próxima pergunta ou finaliza
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < currentQuestions.length) {
+                showQuestion();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        // Mostra a tela final
+        function showEndScreen() {
+            quizScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            finalScore.textContent = `${score} / ${currentQuestions.length}`;
+        }
+        
+        // Reinicia o quiz
+        function restartQuiz() {
+            endScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+
+        // Inicia o script
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
